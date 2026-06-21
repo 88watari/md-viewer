@@ -8,25 +8,22 @@
   <!-- marked.js: 마크다운 파싱 -->
   <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
 
-  <!-- highlight.js: 코드 하이라이팅 -->
+  <!-- highlight.js -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css">
   <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
 
   <style>
-    /* ── 기본 리셋 ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:            #f8f9fa;
-      --surface:       #ffffff;
-      --border:        #dee2e6;
-      --text:          #212529;
-      --text-muted:    #6c757d;
-      --primary:       #0d6efd;
-      --primary-dark:  #0b5ed7;
-      --sidebar-w:     260px;
-      --header-h:      52px;
-      --tab-h:         40px;
+      --bg:           #f8f9fa;
+      --surface:      #ffffff;
+      --border:       #dee2e6;
+      --text:         #212529;
+      --muted:        #6c757d;
+      --primary:      #0d6efd;
+      --primary-dk:   #0b5ed7;
+      --sidebar-w:    260px;
     }
 
     body {
@@ -39,9 +36,9 @@
       overflow: hidden;
     }
 
-    /* ── 헤더 ── */
+    /* 헤더 */
     #header {
-      height: var(--header-h);
+      height: 52px;
       background: #1e2128;
       display: flex;
       align-items: center;
@@ -49,15 +46,13 @@
       gap: 8px;
       flex-shrink: 0;
     }
-
     .app-title {
       color: #e9ecef;
       font-weight: 700;
       font-size: 15px;
-      margin-right: 4px;
       white-space: nowrap;
+      margin-right: 4px;
     }
-
     .btn {
       padding: 6px 14px;
       border: none;
@@ -68,17 +63,10 @@
       white-space: nowrap;
       transition: background 0.15s;
     }
-
     .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { background: var(--primary-dark); }
-
-    .btn-ghost {
-      background: transparent;
-      color: #adb5bd;
-      border: 1px solid #3d4149;
-    }
+    .btn-primary:hover { background: var(--primary-dk); }
+    .btn-ghost { background: transparent; color: #adb5bd; border: 1px solid #3d4149; }
     .btn-ghost:hover { background: #2d3139; color: #e9ecef; }
-
     .btn-icon {
       padding: 6px 12px;
       background: transparent;
@@ -90,17 +78,16 @@
       transition: background 0.15s;
     }
     .btn-icon:hover { background: #2d3139; color: #e9ecef; }
-
     .spacer { flex: 1; }
 
-    /* ── 탭바 ── */
+    /* 탭바 */
     #tab-bar {
-      height: var(--tab-h);
-      min-height: var(--tab-h);
+      height: 40px;
+      min-height: 40px;
       background: #2a2d35;
       display: flex;
       align-items: flex-end;
-      padding: 0 8px 0 8px;
+      padding: 0 8px;
       overflow-x: auto;
       overflow-y: hidden;
       flex-shrink: 0;
@@ -124,26 +111,20 @@
       cursor: pointer;
       font-size: 13px;
       max-width: 200px;
-      min-width: 80px;
+      min-width: 60px;
       white-space: nowrap;
       overflow: hidden;
       user-select: none;
-      transition: background 0.1s;
+      flex-shrink: 0;
     }
     .tab:hover { background: #444851; }
     .tab.active { background: var(--surface); color: var(--text); border-color: var(--border); }
-
     .tab-name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
-
     .tab-close {
-      width: 18px;
-      height: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 18px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
       border-radius: 3px;
-      font-size: 15px;
-      line-height: 1;
+      font-size: 15px; line-height: 1;
       flex-shrink: 0;
       color: #6c757d;
     }
@@ -151,14 +132,10 @@
     .tab.active .tab-close { color: #868e96; }
     .tab.active .tab-close:hover { background: #dee2e6; color: #343a40; }
 
-    /* ── 메인 레이아웃 ── */
-    #main {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
+    /* 메인 */
+    #main { display: flex; flex: 1; overflow: hidden; }
 
-    /* ── 사이드바 ── */
+    /* 사이드바 */
     #sidebar {
       width: var(--sidebar-w);
       min-width: var(--sidebar-w);
@@ -170,19 +147,17 @@
       transition: width 0.2s ease, min-width 0.2s ease;
     }
     #sidebar.hidden { width: 0; min-width: 0; border-right: none; }
-
     .sidebar-title {
       padding: 11px 16px;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: var(--text-muted);
+      color: var(--muted);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
       white-space: nowrap;
     }
-
     #toc {
       flex: 1;
       overflow-y: auto;
@@ -192,7 +167,6 @@
     }
     #toc::-webkit-scrollbar { width: 4px; }
     #toc::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
     .toc-item {
       display: block;
       padding: 5px 16px;
@@ -209,26 +183,13 @@
     }
     .toc-item:hover { background: var(--bg); border-left-color: #adb5bd; }
     .toc-item.active { border-left-color: var(--primary); color: var(--primary); font-weight: 500; }
-
     .toc-h1 { padding-left: 16px; font-weight: 600; }
     .toc-h2 { padding-left: 28px; }
-    .toc-h3 { padding-left: 40px; color: var(--text-muted); font-size: 12px; }
+    .toc-h3 { padding-left: 40px; color: var(--muted); font-size: 12px; }
+    .toc-empty { padding: 20px 16px; color: var(--muted); font-size: 13px; font-style: italic; }
 
-    .toc-empty {
-      padding: 20px 16px;
-      color: var(--text-muted);
-      font-size: 13px;
-      font-style: italic;
-    }
-
-    /* ── 콘텐츠 영역 ── */
-    #content-wrap {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
+    /* 콘텐츠 */
+    #content-wrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
     #content {
       flex: 1;
       overflow-y: auto;
@@ -239,7 +200,7 @@
     #content::-webkit-scrollbar { width: 6px; }
     #content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-    /* ── 환영 화면 ── */
+    /* 환영 화면 */
     #welcome {
       display: flex;
       flex-direction: column;
@@ -247,22 +208,18 @@
       justify-content: center;
       height: 100%;
       gap: 14px;
-      color: var(--text-muted);
       text-align: center;
     }
-    .welcome-icon { font-size: 60px; opacity: 0.25; }
-    #welcome h2 { font-size: 20px; font-weight: 600; color: var(--text); opacity: 0.55; }
-    #welcome p { font-size: 14px; line-height: 1.7; max-width: 300px; }
+    .welcome-icon { font-size: 60px; opacity: 0.2; }
+    #welcome h2 { font-size: 20px; font-weight: 600; color: var(--text); opacity: 0.5; }
+    #welcome p { font-size: 14px; line-height: 1.7; max-width: 300px; color: var(--muted); }
 
-    /* ── 드래그 오버레이 ── */
+    /* 드래그 오버레이 */
     #drop-overlay {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: rgba(13, 110, 253, 0.10);
       border: 3px dashed var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       z-index: 999;
       pointer-events: none;
       opacity: 0;
@@ -279,142 +236,93 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
     }
 
-    /* ── 마크다운 본문 스타일 ── */
-    .md-body {
-      max-width: 820px;
-      margin: 0 auto;
-      line-height: 1.8;
-    }
+    /* 마크다운 본문 */
+    .md-body { max-width: 820px; margin: 0 auto; line-height: 1.8; }
 
     .md-body h1, .md-body h2, .md-body h3,
     .md-body h4, .md-body h5, .md-body h6 {
-      margin-top: 2em;
-      margin-bottom: 0.6em;
-      font-weight: 700;
-      line-height: 1.3;
-      color: #1a1d23;
+      margin-top: 2em; margin-bottom: 0.6em;
+      font-weight: 700; line-height: 1.3; color: #1a1d23;
     }
-    .md-body h1:first-child,
-    .md-body h2:first-child { margin-top: 0; }
-
+    .md-body > .md-body-inner > h1:first-child,
+    .md-body > .md-body-inner > h2:first-child { margin-top: 0; }
     .md-body h1 { font-size: 2em;   border-bottom: 2px solid var(--border); padding-bottom: 0.35em; }
     .md-body h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.25em; }
     .md-body h3 { font-size: 1.25em; }
     .md-body h4 { font-size: 1.1em; }
-    .md-body h5 { font-size: 1em; }
-    .md-body h6 { font-size: 0.95em; color: var(--text-muted); }
+    .md-body h5, .md-body h6 { font-size: 1em; }
+    .md-body h6 { color: var(--muted); }
 
     .md-body p { margin-bottom: 1em; }
-
     .md-body a { color: var(--primary); text-decoration: none; }
     .md-body a:hover { text-decoration: underline; }
 
-    .md-body ul, .md-body ol {
-      margin-bottom: 1em;
-      padding-left: 2em;
-    }
+    .md-body ul, .md-body ol { margin-bottom: 1em; padding-left: 2em; }
     .md-body li { margin-bottom: 0.3em; }
     .md-body li > ul, .md-body li > ol { margin-bottom: 0; }
 
     .md-body blockquote {
-      margin: 1em 0;
-      padding: 0.75em 1.25em;
+      margin: 1em 0; padding: 0.75em 1.25em;
       border-left: 4px solid #adb5bd;
-      background: var(--bg);
-      color: var(--text-muted);
+      background: var(--bg); color: var(--muted);
       border-radius: 0 6px 6px 0;
     }
     .md-body blockquote p { margin-bottom: 0; }
 
     .md-body code {
-      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-family: 'Consolas', 'Monaco', monospace;
       font-size: 0.875em;
       background: #f1f3f5;
       padding: 0.18em 0.42em;
       border-radius: 4px;
       color: #c7254e;
     }
-
     .md-body pre {
-      margin: 1em 0;
-      border-radius: 8px;
-      overflow: auto;
-      background: #f6f8fa;
-      border: 1px solid var(--border);
+      margin: 1em 0; border-radius: 8px; overflow: auto;
+      background: #f6f8fa; border: 1px solid var(--border);
     }
     .md-body pre code {
-      background: none;
-      padding: 0;
-      color: inherit;
-      font-size: 13.5px;
-      border-radius: 0;
+      background: none; padding: 0; color: inherit;
+      font-size: 13.5px; border-radius: 0;
     }
 
-    .md-body table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1em 0;
-      font-size: 14px;
-    }
-    .md-body th, .md-body td {
-      border: 1px solid var(--border);
-      padding: 8px 16px;
-      text-align: left;
-    }
+    .md-body table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 14px; }
+    .md-body th, .md-body td { border: 1px solid var(--border); padding: 8px 16px; text-align: left; }
     .md-body th { background: var(--bg); font-weight: 600; }
     .md-body tr:hover td { background: #f8f9fa; }
 
     .md-body img { max-width: 100%; border-radius: 6px; }
-
     .md-body hr { border: none; border-top: 2px solid var(--border); margin: 2em 0; }
 
-    /* ── 인쇄(PDF) 스타일 ── */
+    /* 인쇄/PDF */
     @media print {
       @page { size: A4; margin: 20mm 18mm; }
-
       body { height: auto; overflow: visible; background: white; display: block; }
-
       #header, #tab-bar, #sidebar, #drop-overlay { display: none !important; }
-
       #main { display: block; }
       #content-wrap, #content { overflow: visible; display: block; padding: 0; }
-
       #welcome { display: none !important; }
-
-      .md-body {
-        max-width: 100%;
-        line-height: 1.7;
-      }
-
-      /* H1이 나올 때마다 새 페이지 */
+      .md-body { max-width: 100%; }
       .md-body h1 { page-break-before: always; }
-      /* 첫 번째 H1은 예외 */
-      .md-body h1.first-heading { page-break-before: avoid; }
-
-      .md-body pre,
-      .md-body blockquote,
-      .md-body table { page-break-inside: avoid; }
-
+      .md-body h1.first-h1 { page-break-before: avoid; }
+      .md-body pre, .md-body blockquote, .md-body table { page-break-inside: avoid; }
       .md-body a { color: inherit; text-decoration: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- 헤더 -->
 <div id="header">
-  <button class="btn-icon" id="btn-toggle-sidebar" title="목차 사이드바 ON/OFF">☰ 목차</button>
+  <button class="btn-icon" id="btn-toggle-sidebar" title="목차 ON/OFF">&#9776; 목차</button>
   <span class="app-title">MD Viewer</span>
   <button class="btn btn-primary" id="btn-open">파일 열기</button>
   <button class="btn btn-ghost" id="btn-close-all">전체 닫기</button>
   <div class="spacer"></div>
-  <button class="btn btn-ghost" id="btn-pdf" title="현재 파일을 PDF로 저장">&#8595; PDF 저장</button>
+  <button class="btn btn-ghost" id="btn-pdf">&#8595; PDF 저장</button>
 </div>
 
-<!-- 탭바 -->
 <div id="tab-bar"></div>
 
-<!-- 메인 -->
 <div id="main">
   <div id="sidebar">
     <div class="sidebar-title">목차</div>
@@ -425,134 +333,146 @@
       <div id="welcome">
         <div class="welcome-icon">&#128221;</div>
         <h2>MD Viewer</h2>
-        <p>상단의 <strong>파일 열기</strong> 버튼을 클릭하거나,<br>.md 파일을 이 영역으로 드래그하세요.</p>
+        <p>상단의 <strong>파일 열기</strong> 버튼을 클릭하거나<br>.md 파일을 드래그해서 놓으세요.</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- 드래그 오버레이 -->
 <div id="drop-overlay">
   <div class="drop-msg">&#128194; 파일을 여기에 놓으세요</div>
 </div>
 
-<!-- 숨겨진 파일 입력 -->
 <input type="file" id="file-input" accept=".md" multiple style="display:none">
 
 <script>
 (function () {
   'use strict';
 
-  // ── 상태 ──────────────────────────────────────────────
-  const state = {
-    tabs: [],      // [{ id, name, content, scrollTop }]
-    activeId: null,
-  };
+  // ── 상태 ─────────────────────────────────────────────
+  var nextId = 1;
+  var tabs = [];       // [{id:number, name:string, content:string, scrollTop:number}]
+  var activeId = null; // number | null
 
-  let dragCounter = 0;
-  let spyObserver = null;
+  var dragCounter = 0;
+  var spyObserver = null;
 
-  // ── DOM 참조 ──────────────────────────────────────────
-  const $tabBar   = document.getElementById('tab-bar');
-  const $content  = document.getElementById('content');
-  const $toc      = document.getElementById('toc');
-  const $sidebar  = document.getElementById('sidebar');
-  const $welcome  = document.getElementById('welcome');
-  const $overlay  = document.getElementById('drop-overlay');
-  const $fileIn   = document.getElementById('file-input');
+  // ── DOM ──────────────────────────────────────────────
+  var $tabBar  = document.getElementById('tab-bar');
+  var $content = document.getElementById('content');
+  var $toc     = document.getElementById('toc');
+  var $sidebar = document.getElementById('sidebar');
+  var $welcome = document.getElementById('welcome');
+  var $overlay = document.getElementById('drop-overlay');
+  var $fileIn  = document.getElementById('file-input');
 
   // ── marked 설정 ──────────────────────────────────────
-  const renderer = new marked.Renderer();
+  marked.setOptions({ gfm: true, breaks: true });
 
-  marked.setOptions({
-    renderer,
-    gfm: true,
-    breaks: true,
-  });
+  // ── sessionStorage 복원 ──────────────────────────────
+  (function restoreSession() {
+    try {
+      var raw = sessionStorage.getItem('md-viewer');
+      if (!raw) return;
+      var saved = JSON.parse(raw);
+      if (!Array.isArray(saved.tabs) || !saved.tabs.length) return;
+      tabs = saved.tabs;
+      // nextId를 충돌 없이 설정
+      tabs.forEach(function(t) { if (t.id >= nextId) nextId = t.id + 1; });
+      activeId = saved.activeId;
+      renderTabs();
+      renderContent();
+    } catch (e) { /* 무시 */ }
+  })();
 
-  // highlight.js 연동
-  marked.use({
-    extensions: [],
-    walkTokens(token) {},
-  });
-
-  // ── 유틸 ─────────────────────────────────────────────
-  function slugify(text, idx) {
-    return text.trim()
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\wㄱ-힣-]/g, '')
-      + '-' + idx;
+  // ── sessionStorage 저장 ──────────────────────────────
+  function saveSession() {
+    try {
+      sessionStorage.setItem('md-viewer', JSON.stringify({ tabs: tabs, activeId: activeId }));
+    } catch (e) { /* 용량 초과 등 무시 */ }
   }
 
-  // ── 파일 읽기 ─────────────────────────────────────────
+  // ── 파일 읽기 ────────────────────────────────────────
   function readFiles(files) {
-    Array.from(files).forEach(file => {
+    var arr = Array.prototype.slice.call(files);
+    arr.forEach(function(file) {
       if (!/\.md$/i.test(file.name)) return;
-      const reader = new FileReader();
-      reader.onload = e => addOrReplaceTab(file.name, e.target.result);
+      var reader = new FileReader();
+      reader.onload = function(e) { addTab(file.name, e.target.result); };
       reader.readAsText(file, 'UTF-8');
     });
   }
 
-  function addOrReplaceTab(name, content) {
-    const existing = state.tabs.find(t => t.name === name);
+  function addTab(name, content) {
+    // 같은 이름 탭이 이미 있으면 내용만 교체
+    var existing = null;
+    for (var i = 0; i < tabs.length; i++) {
+      if (tabs[i].name === name) { existing = tabs[i]; break; }
+    }
     if (existing) {
       existing.content = content;
-      activateTab(existing.id);
+      activate(existing.id);
     } else {
-      const id = Symbol(name);
-      state.tabs.push({ id, name, content, scrollTop: 0 });
-      activateTab(id);
+      var id = nextId++;
+      tabs.push({ id: id, name: name, content: content, scrollTop: 0 });
+      activate(id);
     }
   }
 
-  // ── 탭 활성화 ─────────────────────────────────────────
-  function activateTab(id) {
-    // 현재 탭 스크롤 위치 저장
-    if (state.activeId) {
-      const cur = state.tabs.find(t => t.id === state.activeId);
+  // ── 활성화 ───────────────────────────────────────────
+  function activate(id) {
+    // 현재 탭 스크롤 저장
+    if (activeId !== null) {
+      var cur = findTab(activeId);
       if (cur) cur.scrollTop = $content.scrollTop;
     }
-    state.activeId = id;
+    activeId = id;
+    saveSession();
     renderTabs();
     renderContent();
   }
 
   // ── 탭 닫기 ──────────────────────────────────────────
   function closeTab(id) {
-    const idx = state.tabs.findIndex(t => t.id === id);
+    var idx = -1;
+    for (var i = 0; i < tabs.length; i++) { if (tabs[i].id === id) { idx = i; break; } }
     if (idx === -1) return;
-    state.tabs.splice(idx, 1);
-    if (state.activeId === id) {
-      state.activeId = state.tabs.length
-        ? state.tabs[Math.min(idx, state.tabs.length - 1)].id
-        : null;
+    tabs.splice(idx, 1);
+    if (activeId === id) {
+      activeId = tabs.length ? tabs[Math.min(idx, tabs.length - 1)].id : null;
     }
+    saveSession();
     renderTabs();
     renderContent();
   }
 
-  function closeAllTabs() {
-    state.tabs = [];
-    state.activeId = null;
+  function closeAll() {
+    tabs = [];
+    activeId = null;
+    saveSession();
     renderTabs();
     renderContent();
   }
 
-  // ── 탭 렌더링 ─────────────────────────────────────────
+  // ── 탭 찾기 ──────────────────────────────────────────
+  function findTab(id) {
+    for (var i = 0; i < tabs.length; i++) { if (tabs[i].id === id) return tabs[i]; }
+    return null;
+  }
+
+  // ── 탭 렌더링 ────────────────────────────────────────
   function renderTabs() {
     $tabBar.innerHTML = '';
-    state.tabs.forEach(tab => {
-      const el = document.createElement('div');
-      el.className = 'tab' + (tab.id === state.activeId ? ' active' : '');
+    tabs.forEach(function(tab) {
+      var el = document.createElement('div');
+      el.className = 'tab' + (tab.id === activeId ? ' active' : '');
 
-      const nameEl = document.createElement('span');
+      var nameEl = document.createElement('span');
       nameEl.className = 'tab-name';
       nameEl.textContent = tab.name;
       nameEl.title = tab.name;
 
-      const closeEl = document.createElement('span');
+      var closeEl = document.createElement('span');
       closeEl.className = 'tab-close';
       closeEl.title = '닫기';
       closeEl.textContent = '×';
@@ -560,19 +480,20 @@
       el.appendChild(nameEl);
       el.appendChild(closeEl);
 
-      el.addEventListener('click', e => {
-        if (!e.target.classList.contains('tab-close')) activateTab(tab.id);
-      });
-      closeEl.addEventListener('click', e => {
-        e.stopPropagation();
-        closeTab(tab.id);
-      });
+      (function(t) {
+        el.addEventListener('click', function(e) {
+          if (!e.target.classList.contains('tab-close')) activate(t.id);
+        });
+        closeEl.addEventListener('click', function(e) {
+          e.stopPropagation();
+          closeTab(t.id);
+        });
+      })(tab);
 
       $tabBar.appendChild(el);
     });
 
-    // 활성 탭이 보이도록
-    const activeEl = $tabBar.querySelector('.tab.active');
+    var activeEl = $tabBar.querySelector('.tab.active');
     if (activeEl) activeEl.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
 
@@ -580,36 +501,40 @@
   function renderContent() {
     if (spyObserver) { spyObserver.disconnect(); spyObserver = null; }
 
-    const tab = state.tabs.find(t => t.id === state.activeId);
+    var tab = findTab(activeId);
 
     if (!tab) {
       $content.innerHTML = '';
-      $content.appendChild($welcome);
       $welcome.style.display = 'flex';
+      $content.appendChild($welcome);
       $toc.innerHTML = '<div class="toc-empty">파일을 열면 목차가 표시됩니다</div>';
       return;
     }
 
-    // 마크다운 → HTML
-    const html = marked.parse(tab.content);
+    // 마크다운 파싱 (marked v4: parse()는 항상 string 반환)
+    var html = marked.parse(tab.content);
 
-    const wrapper = document.createElement('div');
+    var wrapper = document.createElement('div');
     wrapper.className = 'md-body';
     wrapper.innerHTML = html;
 
-    // 헤딩 id 부여 + 첫 H1 표시
-    let firstH1 = true;
-    wrapper.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach((el, i) => {
-      el.id = slugify(el.textContent, i);
-      if (el.tagName === 'H1') {
-        if (firstH1) { el.classList.add('first-heading'); firstH1 = false; }
+    // 헤딩 id 부여
+    var firstH1 = true;
+    var allHeadings = wrapper.querySelectorAll('h1,h2,h3,h4,h5,h6');
+    allHeadings.forEach(function(el, i) {
+      el.id = 'h-' + i + '-' + el.textContent.trim().slice(0, 20).replace(/\s+/g, '-').replace(/[^\w가-힣-]/g, '');
+      if (el.tagName === 'H1' && firstH1) {
+        el.classList.add('first-h1');
+        firstH1 = false;
       }
     });
 
-    // 코드 하이라이팅
-    wrapper.querySelectorAll('pre code').forEach(el => {
-      if (!el.classList.contains('hljs')) hljs.highlightElement(el);
-    });
+    // 코드 하이라이팅 (highlight.js CDN 로드 실패 시 무시)
+    if (typeof hljs !== 'undefined') {
+      wrapper.querySelectorAll('pre code').forEach(function(el) {
+        if (!el.classList.contains('hljs')) hljs.highlightElement(el);
+      });
+    }
 
     $content.innerHTML = '';
     $content.appendChild(wrapper);
@@ -620,98 +545,84 @@
 
   // ── TOC 렌더링 ───────────────────────────────────────
   function renderTOC(wrapper) {
-    const headings = Array.from(wrapper.querySelectorAll('h1,h2,h3'));
-
+    var headings = Array.prototype.slice.call(wrapper.querySelectorAll('h1,h2,h3'));
     if (!headings.length) {
       $toc.innerHTML = '<div class="toc-empty">헤딩(H1~H3)이 없습니다</div>';
       return;
     }
 
     $toc.innerHTML = '';
-    const tocItems = [];
+    var items = [];
 
-    headings.forEach(h => {
-      const level = parseInt(h.tagName[1]);
-      const a = document.createElement('a');
+    headings.forEach(function(h) {
+      var level = parseInt(h.tagName[1], 10);
+      var a = document.createElement('a');
       a.className = 'toc-item toc-h' + level;
       a.textContent = h.textContent;
       a.title = h.textContent;
       a.href = '#';
 
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setActiveTOC(a);
-      });
+      (function(heading, link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setActiveTOC(link);
+        });
+      })(h, a);
 
       $toc.appendChild(a);
-      tocItems.push({ a, h });
+      items.push({ h: h, a: a });
     });
 
-    // 스크롤 스파이
-    spyObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
+    spyObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
         if (entry.isIntersecting) {
-          const found = tocItems.find(item => item.h === entry.target);
-          if (found) setActiveTOC(found.a);
+          for (var i = 0; i < items.length; i++) {
+            if (items[i].h === entry.target) { setActiveTOC(items[i].a); break; }
+          }
         }
       });
-    }, {
-      root: $content,
-      rootMargin: '-5% 0px -75% 0px',
-      threshold: 0,
-    });
+    }, { root: $content, rootMargin: '-5% 0px -75% 0px', threshold: 0 });
 
-    headings.forEach(h => spyObserver.observe(h));
+    headings.forEach(function(h) { spyObserver.observe(h); });
   }
 
   function setActiveTOC(activeA) {
-    $toc.querySelectorAll('.toc-item').forEach(el => el.classList.remove('active'));
+    var all = $toc.querySelectorAll('.toc-item');
+    all.forEach(function(el) { el.classList.remove('active'); });
     activeA.classList.add('active');
   }
 
-  // ── 이벤트 바인딩 ────────────────────────────────────
+  // ── 이벤트 ──────────────────────────────────────────
+  document.getElementById('btn-open').addEventListener('click', function() { $fileIn.click(); });
+  $fileIn.addEventListener('change', function(e) { readFiles(e.target.files); $fileIn.value = ''; });
 
-  // 파일 열기 버튼
-  document.getElementById('btn-open').addEventListener('click', () => $fileIn.click());
-  $fileIn.addEventListener('change', e => {
-    readFiles(e.target.files);
-    $fileIn.value = '';
-  });
+  document.getElementById('btn-close-all').addEventListener('click', closeAll);
 
-  // 전체 닫기
-  document.getElementById('btn-close-all').addEventListener('click', closeAllTabs);
-
-  // 사이드바 토글
-  document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
+  document.getElementById('btn-toggle-sidebar').addEventListener('click', function() {
     $sidebar.classList.toggle('hidden');
   });
 
-  // PDF 저장
-  document.getElementById('btn-pdf').addEventListener('click', () => {
-    if (!state.activeId) { alert('열려 있는 파일이 없습니다.'); return; }
+  document.getElementById('btn-pdf').addEventListener('click', function() {
+    if (activeId === null) { alert('열려 있는 파일이 없습니다.'); return; }
     window.print();
   });
 
   // 드래그 앤 드롭
-  document.addEventListener('dragenter', e => {
+  document.addEventListener('dragenter', function(e) {
     e.preventDefault();
     if (++dragCounter === 1) $overlay.classList.add('active');
   });
-  document.addEventListener('dragleave', () => {
+  document.addEventListener('dragleave', function() {
     if (--dragCounter === 0) $overlay.classList.remove('active');
   });
-  document.addEventListener('dragover', e => e.preventDefault());
-  document.addEventListener('drop', e => {
+  document.addEventListener('dragover', function(e) { e.preventDefault(); });
+  document.addEventListener('drop', function(e) {
     e.preventDefault();
     dragCounter = 0;
     $overlay.classList.remove('active');
     readFiles(e.dataTransfer.files);
   });
-
-  // ── 초기 렌더링 ──────────────────────────────────────
-  renderTabs();
-  renderContent();
 
 })();
 </script>
