@@ -19,7 +19,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css">
   <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
 
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -302,73 +301,8 @@
     .md-body img { max-width: 100%; border-radius: 6px; }
     .md-body hr { border: none; border-top: 2px solid var(--border); margin: 2em 0; }
 
-    /* ── Mermaid 다이어그램 ── */
-    .mermaid-wrap {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin: 1.2em 0;
-      overflow: hidden;
-      background: #fff;
-    }
-    .mermaid-ctrl {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .mctrl-btn {
-      padding: 3px 10px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: white;
-      cursor: pointer;
-      font-size: 12px;
-      line-height: 1.5;
-      color: var(--text);
-      white-space: nowrap;
-    }
-    .mctrl-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-    .mctrl-sep { width: 1px; height: 16px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
-    .mctrl-zoom-label {
-      font-size: 12px;
-      color: var(--muted);
-      min-width: 40px;
-      text-align: center;
-    }
-    .mermaid-stage {
-      overflow: auto;
-      padding: 24px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 80px;
-      background: white;
-    }
-    .mermaid-inner {
-      transform-origin: top center;
-      transition: transform 0.15s;
-      display: inline-block;
-    }
-    .mermaid-stage svg { display: block; cursor: pointer; }
-    .mermaid-error {
-      color: #c7254e;
-      font-size: 13px;
-      padding: 12px 16px;
-      background: #fff5f5;
-      border: 1px solid #fcc;
-      border-radius: 6px;
-      white-space: pre-wrap;
-      font-family: 'Consolas', monospace;
-    }
-
     /* 인쇄/PDF */
     @media print {
-      .mermaid-ctrl { display: none !important; }
-      .mermaid-stage { overflow: visible; padding: 8px 0; justify-content: flex-start; }
-      .mermaid-inner { transform: none !important; }
       @page { size: A4; margin: 20mm 18mm; }
       body { height: auto; overflow: visible; background: white; display: block; }
       #header, #tab-bar, #sidebar, #drop-overlay { display: none !important; }
@@ -439,7 +373,7 @@
   var $overlay = document.getElementById('drop-overlay');
   var $fileIn  = document.getElementById('file-input');
 
-  // ── marked 설정 ────────────────────────────────────────
+  // ── marked 설정 ──────────────────────────────────────
   marked.setOptions({ gfm: true, breaks: true });
 
   // ── sessionStorage 복원 ──────────────────────────────
@@ -602,30 +536,6 @@
       }
     });
 
-    // mermaid 코드 블록을 mermaid-wrap 위젯으로 교체 (marked 설정 비개입 방식)
-    wrapper.querySelectorAll('pre code').forEach(function(codeEl) {
-      if (!/language-mermaid|lang-mermaid/i.test(codeEl.className || '')) return;
-      var pre = codeEl.parentElement;
-      var rawCode = codeEl.textContent;
-      var esc = rawCode.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      var wrap = document.createElement('div');
-      wrap.innerHTML = '<div class="mermaid-wrap">'
-        + '<div class="mermaid-ctrl">'
-        + '<button class="mctrl-btn" data-action="zoom-out">－</button>'
-        + '<span class="mctrl-zoom-label">100%</span>'
-        + '<button class="mctrl-btn" data-action="zoom-in">＋</button>'
-        + '<div class="mctrl-sep"></div>'
-        + '<button class="mctrl-btn" data-action="fit-width">너비 맞춤</button>'
-        + '<button class="mctrl-btn" data-action="fit-view">창 맞춤</button>'
-        + '<div class="mctrl-sep"></div>'
-        + '<button class="mctrl-btn" data-action="save-svg">SVG 저장</button>'
-        + '<button class="mctrl-btn" data-action="save-png">PNG 저장</button>'
-        + '</div>'
-        + '<div class="mermaid-stage"><div class="mermaid-inner"><pre class="mermaid-src" style="display:none">' + esc + '</pre></div></div>'
-        + '</div>';
-      pre.parentNode.replaceChild(wrap.firstChild, pre);
-    });
-
     // 코드 하이라이팅 (highlight.js CDN 로드 실패 시 무시)
     if (typeof hljs !== 'undefined') {
       wrapper.querySelectorAll('pre code').forEach(function(el) {
@@ -638,7 +548,6 @@
     $content.scrollTop = tab.scrollTop || 0;
 
     renderTOC(wrapper);
-    runMermaid(wrapper);
   }
 
   // ── TOC 렌더링 ───────────────────────────────────────
@@ -689,168 +598,6 @@
     var all = $toc.querySelectorAll('.toc-item');
     all.forEach(function(el) { el.classList.remove('active'); });
     activeA.classList.add('active');
-  }
-
-  // ── Mermaid 렌더링 ───────────────────────────────────
-  var _mermaidLoaded = false;
-  var _mermaidLoading = false;
-  var _mermaidQueue = [];
-
-  function loadMermaid(callback) {
-    if (_mermaidLoaded) { callback(); return; }
-    _mermaidQueue.push(callback);
-    if (_mermaidLoading) return;
-    _mermaidLoading = true;
-    var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
-    s.onload = function() {
-      try { mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' }); } catch(e) {}
-      _mermaidLoaded = true;
-      _mermaidLoading = false;
-      _mermaidQueue.forEach(function(fn) { try { fn(); } catch(e) {} });
-      _mermaidQueue = [];
-    };
-    s.onerror = function() {
-      _mermaidLoading = false;
-      _mermaidQueue = [];
-    };
-    document.head.appendChild(s);
-  }
-
-  function runMermaid(wrapper) {
-    var wraps = wrapper.querySelectorAll('.mermaid-wrap');
-    if (!wraps.length) return;
-    loadMermaid(function() { renderMermaidWraps(wraps); });
-  }
-
-  function renderMermaidWraps(wraps) {
-    wraps.forEach(function(wrap) {
-      var inner = wrap.querySelector('.mermaid-inner');
-      var srcEl = wrap.querySelector('.mermaid-src');
-      if (!inner || !srcEl) return;
-      var code = srcEl.textContent
-        .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
-      mermaid.render('mermaid-svg-' + Math.random().toString(36).slice(2,8), code)
-        .then(function(result) {
-          inner.innerHTML = result.svg;
-          var svg = inner.querySelector('svg');
-          if (svg) {
-            svg.removeAttribute('height');
-            setupMermaidControls(wrap, inner, svg);
-          }
-        })
-        .catch(function(err) {
-          inner.innerHTML = '<div class="mermaid-error">Mermaid 오류:\n' + err.message + '</div>';
-        });
-    });
-  }
-
-  function setupMermaidControls(wrap, inner, svg) {
-    var stage = wrap.querySelector('.mermaid-stage');
-    var zoomLabel = wrap.querySelector('.mctrl-zoom-label');
-    var scale = 1;
-    var STEP = 0.2, MIN = 0.2, MAX = 5;
-
-    function applyZoom() {
-      inner.style.transform = 'scale(' + scale + ')';
-      // 스케일에 따른 실제 높이 보정 (마진이 겹치지 않도록)
-      var h = svg.getBoundingClientRect().height;
-      inner.style.marginBottom = (h * (scale - 1)) + 'px';
-      inner.style.marginRight  = (inner.scrollWidth * (scale - 1) / 2) + 'px';
-      zoomLabel.textContent = Math.round(scale * 100) + '%';
-    }
-
-    function fitWidth() {
-      var stageW = stage.clientWidth - 48;
-      var svgW   = svg.viewBox.baseVal.width || svg.getBoundingClientRect().width || 400;
-      scale = Math.min(MAX, Math.max(MIN, parseFloat((stageW / svgW).toFixed(2))));
-      applyZoom();
-    }
-
-    function fitView() {
-      var stageW = stage.clientWidth - 48;
-      var stageH = ($content.clientHeight || window.innerHeight) * 0.7;
-      var svgW   = svg.viewBox.baseVal.width  || 400;
-      var svgH   = svg.viewBox.baseVal.height || 200;
-      scale = Math.min(MAX, Math.max(MIN, parseFloat(Math.min(stageW/svgW, stageH/svgH).toFixed(2))));
-      applyZoom();
-    }
-
-    // 버튼 이벤트
-    wrap.querySelectorAll('.mctrl-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var a = btn.dataset.action;
-        if      (a === 'zoom-in')   { scale = Math.min(MAX, parseFloat((scale+STEP).toFixed(1))); applyZoom(); }
-        else if (a === 'zoom-out')  { scale = Math.max(MIN, parseFloat((scale-STEP).toFixed(1))); applyZoom(); }
-        else if (a === 'fit-width') { fitWidth(); }
-        else if (a === 'fit-view')  { fitView(); }
-        else if (a === 'save-svg')  { saveMermaidSVG(svg); }
-        else if (a === 'save-png')  { saveMermaidPNG(svg); }
-      });
-    });
-
-    // Ctrl+휠 줌
-    stage.addEventListener('wheel', function(e) {
-      if (!e.ctrlKey && !e.metaKey) return;
-      e.preventDefault();
-      scale = e.deltaY < 0
-        ? Math.min(MAX, parseFloat((scale+0.1).toFixed(1)))
-        : Math.max(MIN, parseFloat((scale-0.1).toFixed(1)));
-      applyZoom();
-    }, { passive: false });
-
-    // 더블클릭 → 팝업
-    svg.addEventListener('dblclick', function() { popupMermaid(svg); });
-  }
-
-  function popupMermaid(svg) {
-    var svgStr = new XMLSerializer().serializeToString(svg);
-    var vb = svg.viewBox.baseVal;
-    var pw = Math.min(1400, Math.max(600, (vb.width  || 800) + 80));
-    var ph = Math.min(900,  Math.max(400, (vb.height || 500) + 80));
-    var win = window.open('', '_blank', 'width='+pw+',height='+ph+',resizable=yes,scrollbars=yes');
-    if (!win) { alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도하세요.'); return; }
-    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Diagram</title>'
-      + '<style>*{box-sizing:border-box;margin:0;padding:0}'
-      + 'body{background:#f8f9fa;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}'
-      + 'svg{max-width:100%;height:auto;box-shadow:0 2px 16px rgba(0,0,0,.12);border-radius:6px;background:#fff}'
-      + '</style></head><body>' + svgStr + '</body></html>');
-    win.document.close();
-  }
-
-  function saveMermaidSVG(svg) {
-    var svgStr = new XMLSerializer().serializeToString(svg);
-    var blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-    var url  = URL.createObjectURL(blob);
-    var a    = document.createElement('a');
-    a.href = url; a.download = 'diagram.svg';
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
-  }
-
-  function saveMermaidPNG(svg) {
-    var vb  = svg.viewBox.baseVal;
-    var w   = (vb && vb.width)  ? vb.width  * 2 : 1200;
-    var h   = (vb && vb.height) ? vb.height * 2 : 800;
-    var svgStr = new XMLSerializer().serializeToString(svg);
-    var blob   = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-    var url    = URL.createObjectURL(blob);
-    var img    = new Image();
-    img.onload = function() {
-      var canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      var ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, w, h);
-      ctx.drawImage(img, 0, 0, w, h);
-      URL.revokeObjectURL(url);
-      var a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
-      a.download = 'diagram.png';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    };
-    img.onerror = function() { URL.revokeObjectURL(url); alert('PNG 변환 실패'); };
-    img.src = url;
   }
 
   // ── 이벤트 ──────────────────────────────────────────
