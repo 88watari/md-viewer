@@ -340,17 +340,16 @@
       text-align: center;
     }
     .mermaid-stage {
-      overflow: auto;
-      padding: 24px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 80px;
+      position: relative;
+      overflow: hidden;
+      min-height: 120px;
       background: white;
     }
     .mermaid-inner {
-      transform-origin: top center;
-      transition: transform 0.15s;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
       display: inline-block;
     }
     .mermaid-stage svg { display: block; cursor: pointer; }
@@ -754,50 +753,59 @@
     var stage = wrap.querySelector('.mermaid-stage');
     var zoomLabel = wrap.querySelector('.mctrl-zoom-label');
     var scale = 1;
-    var tx = 0, ty = 0;
+    var tx = 24, ty = 24;
     var STEP = 0.2, MIN = 0.2, MAX = 5;
 
-    function svgW() { return svg.viewBox.baseVal.width  || svg.getBoundingClientRect().width  || 400; }
-    function svgH() { return svg.viewBox.baseVal.height || svg.getBoundingClientRect().height || 200; }
+    // SVG 크기를 viewBox 기반으로 명시 고정 (텍스트 렌더링 안정화)
+    var vb = svg.viewBox.baseVal;
+    var iW = vb.width  || svg.getBoundingClientRect().width  || 400;
+    var iH = vb.height || svg.getBoundingClientRect().height || 200;
+    svg.setAttribute('width',  iW);
+    svg.setAttribute('height', iH);
+    inner.style.cursor = 'grab';
 
     function applyTransform() {
       inner.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
-      inner.style.marginBottom = Math.max(0, svgH() * (scale - 1)) + 'px';
-      inner.style.marginRight  = Math.max(0, svgW() * (scale - 1) / 2) + 'px';
+      // stage 최소 높이를 현재 스케일 기준 콘텐츠 높이에 맞게 유지
+      stage.style.minHeight = Math.max(120, iH * scale + 48) + 'px';
       zoomLabel.textContent = Math.round(scale * 100) + '%';
     }
 
+    function centerX() {
+      tx = Math.max(24, (stage.clientWidth - iW * scale) / 2);
+    }
+
     function fitWidth() {
-      tx = 0; ty = 0;
-      scale = Math.min(MAX, Math.max(MIN, parseFloat(((stage.clientWidth - 48) / svgW()).toFixed(2))));
+      scale = Math.min(MAX, Math.max(MIN, parseFloat(((stage.clientWidth - 48) / iW).toFixed(2))));
+      centerX(); ty = 24;
       applyTransform();
     }
 
     function fitView() {
-      tx = 0; ty = 0;
       var sw = stage.clientWidth - 48;
       var sh = ($content.clientHeight || window.innerHeight) * 0.7;
-      scale = Math.min(MAX, Math.max(MIN, parseFloat(Math.min(sw / svgW(), sh / svgH()).toFixed(2))));
+      scale = Math.min(MAX, Math.max(MIN, parseFloat(Math.min(sw / iW, sh / iH).toFixed(2))));
+      centerX(); ty = 24;
       applyTransform();
     }
 
     function fitCanvas() {
-      stage.style.height = (svgH() * scale + 48) + 'px';
-      inner.style.marginBottom = '0';
+      stage.style.minHeight = (iH * scale + 48) + 'px';
     }
 
     function resetView() {
-      scale = 1; tx = 0; ty = 0;
-      stage.style.height = '';
-      inner.style.marginBottom = '';
-      inner.style.marginRight = '';
+      scale = 1;
+      centerX(); ty = 24;
+      stage.style.minHeight = '';
       applyTransform();
     }
 
+    // 초기 배치
+    centerX();
+    applyTransform();
+
     // 드래그 이동
     var dragging = false, dragX = 0, dragY = 0, startTx = 0, startTy = 0;
-    inner.style.cursor = 'grab';
-
     inner.addEventListener('mousedown', function(e) {
       if (e.button !== 0) return;
       dragging = true;
@@ -833,13 +841,19 @@
       });
     });
 
-    // Ctrl+휠 줌
+    // Ctrl+휠: 마우스 위치 기준 줌
     stage.addEventListener('wheel', function(e) {
       if (!e.ctrlKey && !e.metaKey) return;
       e.preventDefault();
+      var prev = scale;
       scale = e.deltaY < 0
         ? Math.min(MAX, parseFloat((scale+0.1).toFixed(1)))
         : Math.max(MIN, parseFloat((scale-0.1).toFixed(1)));
+      var rect = stage.getBoundingClientRect();
+      var mx = e.clientX - rect.left;
+      var my = e.clientY - rect.top;
+      tx = mx - (mx - tx) * (scale / prev);
+      ty = my - (my - ty) * (scale / prev);
       applyTransform();
     }, { passive: false });
 
