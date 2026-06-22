@@ -19,8 +19,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css">
   <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
 
-  <!-- mermaid.js -->
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -445,13 +443,6 @@
   // ── marked 설정 ────────────────────────────────────────
   marked.setOptions({ gfm: true, breaks: true });
 
-  // ── mermaid 초기화 ───────────────────────────────────
-  try {
-    if (typeof mermaid !== 'undefined') {
-      mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-    }
-  } catch (e) { /* mermaid CDN 로드 실패 시 무시 */ }
-
   // ── sessionStorage 복원 ──────────────────────────────
   (function restoreSession() {
     try {
@@ -702,24 +693,50 @@
   }
 
   // ── Mermaid 렌더링 ───────────────────────────────────
+  var _mermaidLoaded = false;
+  var _mermaidLoading = false;
+  var _mermaidQueue = [];
+
+  function loadMermaid(callback) {
+    if (_mermaidLoaded) { callback(); return; }
+    _mermaidQueue.push(callback);
+    if (_mermaidLoading) return;
+    _mermaidLoading = true;
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+    s.onload = function() {
+      try { mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' }); } catch(e) {}
+      _mermaidLoaded = true;
+      _mermaidLoading = false;
+      _mermaidQueue.forEach(function(fn) { try { fn(); } catch(e) {} });
+      _mermaidQueue = [];
+    };
+    s.onerror = function() {
+      _mermaidLoading = false;
+      _mermaidQueue = [];
+    };
+    document.head.appendChild(s);
+  }
+
   function runMermaid(wrapper) {
-    if (typeof mermaid === 'undefined') return;
     var wraps = wrapper.querySelectorAll('.mermaid-wrap');
     if (!wraps.length) return;
+    loadMermaid(function() { renderMermaidWraps(wraps); });
+  }
 
+  function renderMermaidWraps(wraps) {
     wraps.forEach(function(wrap) {
       var inner = wrap.querySelector('.mermaid-inner');
       var srcEl = wrap.querySelector('.mermaid-src');
       if (!inner || !srcEl) return;
       var code = srcEl.textContent
         .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
-
       mermaid.render('mermaid-svg-' + Math.random().toString(36).slice(2,8), code)
         .then(function(result) {
           inner.innerHTML = result.svg;
           var svg = inner.querySelector('svg');
           if (svg) {
-            svg.removeAttribute('height'); // 고정 높이 제거 → 비율 유지
+            svg.removeAttribute('height');
             setupMermaidControls(wrap, inner, svg);
           }
         })
