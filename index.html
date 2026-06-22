@@ -317,7 +317,8 @@
       padding: 6px 10px;
       background: var(--bg);
       border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
     }
     .mctrl-btn {
       padding: 3px 10px;
@@ -611,6 +612,8 @@
       var wrap = document.createElement('div');
       wrap.innerHTML = '<div class="mermaid-wrap">'
         + '<div class="mermaid-ctrl">'
+        + '<button class="mctrl-btn" data-action="reset">초기화</button>'
+        + '<div class="mctrl-sep"></div>'
         + '<button class="mctrl-btn" data-action="zoom-out">－</button>'
         + '<span class="mctrl-zoom-label">100%</span>'
         + '<button class="mctrl-btn" data-action="zoom-in">＋</button>'
@@ -783,6 +786,14 @@
       inner.style.marginBottom = '0';
     }
 
+    function resetView() {
+      scale = 1; tx = 0; ty = 0;
+      stage.style.height = '';
+      inner.style.marginBottom = '';
+      inner.style.marginRight = '';
+      applyTransform();
+    }
+
     // 드래그 이동
     var dragging = false, dragX = 0, dragY = 0, startTx = 0, startTy = 0;
     inner.style.cursor = 'grab';
@@ -811,7 +822,8 @@
     wrap.querySelectorAll('.mctrl-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var a = btn.dataset.action;
-        if      (a === 'zoom-in')    { scale = Math.min(MAX, parseFloat((scale+STEP).toFixed(1))); applyTransform(); }
+        if      (a === 'reset')      { resetView(); }
+        else if (a === 'zoom-in')    { scale = Math.min(MAX, parseFloat((scale+STEP).toFixed(1))); applyTransform(); }
         else if (a === 'zoom-out')   { scale = Math.max(MIN, parseFloat((scale-STEP).toFixed(1))); applyTransform(); }
         else if (a === 'fit-width')  { fitWidth(); }
         else if (a === 'fit-view')   { fitView(); }
