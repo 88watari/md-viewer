@@ -442,35 +442,42 @@
   var $overlay = document.getElementById('drop-overlay');
   var $fileIn  = document.getElementById('file-input');
 
-  // ── marked 설정 + mermaid 코드 블록 커스텀 렌더러 ──────
-  var mdRenderer = new marked.Renderer();
-  var _origCode = mdRenderer.code.bind(mdRenderer);
-  mdRenderer.code = function(code, lang) {
-    if ((lang || '').trim().toLowerCase() === 'mermaid') {
-      var esc = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      return '<div class="mermaid-wrap">'
-        + '<div class="mermaid-ctrl">'
-        + '<button class="mctrl-btn" data-action="zoom-out">－</button>'
-        + '<span class="mctrl-zoom-label">100%</span>'
-        + '<button class="mctrl-btn" data-action="zoom-in">＋</button>'
-        + '<div class="mctrl-sep"></div>'
-        + '<button class="mctrl-btn" data-action="fit-width">너비 맞춤</button>'
-        + '<button class="mctrl-btn" data-action="fit-view">창 맞춤</button>'
-        + '<div class="mctrl-sep"></div>'
-        + '<button class="mctrl-btn" data-action="save-svg">SVG 저장</button>'
-        + '<button class="mctrl-btn" data-action="save-png">PNG 저장</button>'
-        + '</div>'
-        + '<div class="mermaid-stage"><div class="mermaid-inner"><pre class="mermaid-src" style="display:none">' + esc + '</pre></div></div>'
-        + '</div>';
+  // ── marked 설정 ────────────────────────────────────────
+  marked.setOptions({ gfm: true, breaks: true });
+
+  // mermaid 코드 블록 커스텀 렌더러 (marked.use 방식 — v4 권장)
+  marked.use({
+    renderer: {
+      code: function(code, lang) {
+        if ((lang || '').trim().toLowerCase() === 'mermaid') {
+          var esc = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          return '<div class="mermaid-wrap">'
+            + '<div class="mermaid-ctrl">'
+            + '<button class="mctrl-btn" data-action="zoom-out">－</button>'
+            + '<span class="mctrl-zoom-label">100%</span>'
+            + '<button class="mctrl-btn" data-action="zoom-in">＋</button>'
+            + '<div class="mctrl-sep"></div>'
+            + '<button class="mctrl-btn" data-action="fit-width">너비 맞춤</button>'
+            + '<button class="mctrl-btn" data-action="fit-view">창 맞춤</button>'
+            + '<div class="mctrl-sep"></div>'
+            + '<button class="mctrl-btn" data-action="save-svg">SVG 저장</button>'
+            + '<button class="mctrl-btn" data-action="save-png">PNG 저장</button>'
+            + '</div>'
+            + '<div class="mermaid-stage"><div class="mermaid-inner"><pre class="mermaid-src" style="display:none">' + esc + '</pre></div></div>'
+            + '</div>';
+        }
+        // false 반환 → marked 기본 렌더링 사용
+        return false;
+      }
     }
-    return _origCode(code, lang);
-  };
-  marked.setOptions({ gfm: true, breaks: true, renderer: mdRenderer });
+  });
 
   // ── mermaid 초기화 ───────────────────────────────────
-  if (typeof mermaid !== 'undefined') {
-    mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-  }
+  try {
+    if (typeof mermaid !== 'undefined') {
+      mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+    }
+  } catch (e) { /* mermaid CDN 로드 실패 시 무시 */ }
 
   // ── sessionStorage 복원 ──────────────────────────────
   (function restoreSession() {
