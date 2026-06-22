@@ -352,7 +352,7 @@
       transform-origin: 0 0;
       display: inline-block;
     }
-    .mermaid-stage svg { display: block; cursor: pointer; }
+    .mermaid-stage svg { display: block; cursor: pointer; overflow: visible; }
     .mermaid-error {
       color: #c7254e;
       font-size: 13px;
@@ -620,8 +620,6 @@
         + '<button class="mctrl-btn" data-action="fit-width">너비 맞춤</button>'
         + '<button class="mctrl-btn" data-action="fit-view">창 맞춤</button>'
         + '<div class="mctrl-sep"></div>'
-        + '<button class="mctrl-btn" data-action="fit-canvas">캔버스 최적화</button>'
-        + '<div class="mctrl-sep"></div>'
         + '<button class="mctrl-btn" data-action="save-svg">SVG 저장</button>'
         + '<button class="mctrl-btn" data-action="save-png">PNG 저장</button>'
         + '</div>'
@@ -762,6 +760,8 @@
     var iH = vb.height || svg.getBoundingClientRect().height || 200;
     svg.setAttribute('width',  iW);
     svg.setAttribute('height', iH);
+    svg.setAttribute('overflow', 'visible');
+    svg.style.overflow = 'visible';
     inner.style.cursor = 'grab';
 
     function applyTransform() {
@@ -787,10 +787,6 @@
       scale = Math.min(MAX, Math.max(MIN, parseFloat(Math.min(sw / iW, sh / iH).toFixed(2))));
       centerX(); ty = 24;
       applyTransform();
-    }
-
-    function fitCanvas() {
-      stage.style.minHeight = (iH * scale + 48) + 'px';
     }
 
     function resetView() {
@@ -835,7 +831,6 @@
         else if (a === 'zoom-out')   { scale = Math.max(MIN, parseFloat((scale-STEP).toFixed(1))); applyTransform(); }
         else if (a === 'fit-width')  { fitWidth(); }
         else if (a === 'fit-view')   { fitView(); }
-        else if (a === 'fit-canvas') { fitCanvas(); }
         else if (a === 'save-svg')   { saveMermaidSVG(svg); }
         else if (a === 'save-png')   { saveMermaidPNG(svg); }
       });
