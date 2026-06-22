@@ -353,6 +353,7 @@
       display: inline-block;
     }
     .mermaid-stage svg { display: block; cursor: pointer; overflow: visible; }
+    .mermaid-stage svg foreignObject { overflow: visible; }
     .mermaid-error {
       color: #c7254e;
       font-size: 13px;
@@ -736,10 +737,25 @@
         .then(function(result) {
           inner.innerHTML = result.svg;
           var svg = inner.querySelector('svg');
-          if (svg) {
-            svg.removeAttribute('height');
+          if (!svg) return;
+          svg.setAttribute('overflow', 'visible');
+          svg.style.overflow = 'visible';
+          // foreignObject 실제 높이 재계산 (두 번째 줄 텍스트 잘림 방지)
+          setTimeout(function() {
+            svg.querySelectorAll('foreignObject').forEach(function(fo) {
+              var div = fo.querySelector('div');
+              if (!div) return;
+              var needed = div.scrollHeight + 4;
+              var curr = parseFloat(fo.getAttribute('height') || 0);
+              if (needed > curr) {
+                fo.setAttribute('height', needed);
+                var bottom = parseFloat(fo.getAttribute('y') || 0) + needed;
+                var vb = svg.viewBox.baseVal;
+                if (bottom > vb.height) vb.height = bottom + 20;
+              }
+            });
             setupMermaidControls(wrap, inner, svg);
-          }
+          }, 50);
         })
         .catch(function(err) {
           inner.innerHTML = '<div class="mermaid-error">Mermaid 오류:\n' + err.message + '</div>';
@@ -796,7 +812,8 @@
       applyTransform();
     }
 
-    // 초기 배치
+    // 초기 scale: stage 너비에 맞게 자동 축소 (단 원본보다 확대하지 않음)
+    scale = Math.min(1.0, Math.max(MIN, parseFloat(((stage.clientWidth - 48) / iW).toFixed(2))));
     centerX();
     applyTransform();
 
