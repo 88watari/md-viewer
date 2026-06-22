@@ -445,33 +445,6 @@
   // ── marked 설정 ────────────────────────────────────────
   marked.setOptions({ gfm: true, breaks: true });
 
-  // mermaid 코드 블록 커스텀 렌더러 (marked.use 방식 — v4 권장)
-  marked.use({
-    renderer: {
-      code: function(code, lang) {
-        if ((lang || '').trim().toLowerCase() === 'mermaid') {
-          var esc = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-          return '<div class="mermaid-wrap">'
-            + '<div class="mermaid-ctrl">'
-            + '<button class="mctrl-btn" data-action="zoom-out">－</button>'
-            + '<span class="mctrl-zoom-label">100%</span>'
-            + '<button class="mctrl-btn" data-action="zoom-in">＋</button>'
-            + '<div class="mctrl-sep"></div>'
-            + '<button class="mctrl-btn" data-action="fit-width">너비 맞춤</button>'
-            + '<button class="mctrl-btn" data-action="fit-view">창 맞춤</button>'
-            + '<div class="mctrl-sep"></div>'
-            + '<button class="mctrl-btn" data-action="save-svg">SVG 저장</button>'
-            + '<button class="mctrl-btn" data-action="save-png">PNG 저장</button>'
-            + '</div>'
-            + '<div class="mermaid-stage"><div class="mermaid-inner"><pre class="mermaid-src" style="display:none">' + esc + '</pre></div></div>'
-            + '</div>';
-        }
-        // false 반환 → marked 기본 렌더링 사용
-        return false;
-      }
-    }
-  });
-
   // ── mermaid 초기화 ───────────────────────────────────
   try {
     if (typeof mermaid !== 'undefined') {
@@ -637,6 +610,30 @@
         el.classList.add('first-h1');
         firstH1 = false;
       }
+    });
+
+    // mermaid 코드 블록을 mermaid-wrap 위젯으로 교체 (marked 설정 비개입 방식)
+    wrapper.querySelectorAll('pre code').forEach(function(codeEl) {
+      if (!/language-mermaid|lang-mermaid/i.test(codeEl.className || '')) return;
+      var pre = codeEl.parentElement;
+      var rawCode = codeEl.textContent;
+      var esc = rawCode.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      var wrap = document.createElement('div');
+      wrap.innerHTML = '<div class="mermaid-wrap">'
+        + '<div class="mermaid-ctrl">'
+        + '<button class="mctrl-btn" data-action="zoom-out">－</button>'
+        + '<span class="mctrl-zoom-label">100%</span>'
+        + '<button class="mctrl-btn" data-action="zoom-in">＋</button>'
+        + '<div class="mctrl-sep"></div>'
+        + '<button class="mctrl-btn" data-action="fit-width">너비 맞춤</button>'
+        + '<button class="mctrl-btn" data-action="fit-view">창 맞춤</button>'
+        + '<div class="mctrl-sep"></div>'
+        + '<button class="mctrl-btn" data-action="save-svg">SVG 저장</button>'
+        + '<button class="mctrl-btn" data-action="save-png">PNG 저장</button>'
+        + '</div>'
+        + '<div class="mermaid-stage"><div class="mermaid-inner"><pre class="mermaid-src" style="display:none">' + esc + '</pre></div></div>'
+        + '</div>';
+      pre.parentNode.replaceChild(wrap.firstChild, pre);
     });
 
     // 코드 하이라이팅 (highlight.js CDN 로드 실패 시 무시)
