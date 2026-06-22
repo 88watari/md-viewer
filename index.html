@@ -618,6 +618,8 @@
         + '<button class="mctrl-btn" data-action="fit-width">너비 맞춤</button>'
         + '<button class="mctrl-btn" data-action="fit-view">창 맞춤</button>'
         + '<div class="mctrl-sep"></div>'
+        + '<button class="mctrl-btn" data-action="fit-canvas">캔버스 최적화</button>'
+        + '<div class="mctrl-sep"></div>'
         + '<button class="mctrl-btn" data-action="save-svg">SVG 저장</button>'
         + '<button class="mctrl-btn" data-action="save-png">PNG 저장</button>'
         + '</div>'
@@ -749,43 +751,73 @@
     var stage = wrap.querySelector('.mermaid-stage');
     var zoomLabel = wrap.querySelector('.mctrl-zoom-label');
     var scale = 1;
+    var tx = 0, ty = 0;
     var STEP = 0.2, MIN = 0.2, MAX = 5;
 
-    function applyZoom() {
-      inner.style.transform = 'scale(' + scale + ')';
-      // 스케일에 따른 실제 높이 보정 (마진이 겹치지 않도록)
-      var h = svg.getBoundingClientRect().height;
-      inner.style.marginBottom = (h * (scale - 1)) + 'px';
-      inner.style.marginRight  = (inner.scrollWidth * (scale - 1) / 2) + 'px';
+    function svgW() { return svg.viewBox.baseVal.width  || svg.getBoundingClientRect().width  || 400; }
+    function svgH() { return svg.viewBox.baseVal.height || svg.getBoundingClientRect().height || 200; }
+
+    function applyTransform() {
+      inner.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+      inner.style.marginBottom = Math.max(0, svgH() * (scale - 1)) + 'px';
+      inner.style.marginRight  = Math.max(0, svgW() * (scale - 1) / 2) + 'px';
       zoomLabel.textContent = Math.round(scale * 100) + '%';
     }
 
     function fitWidth() {
-      var stageW = stage.clientWidth - 48;
-      var svgW   = svg.viewBox.baseVal.width || svg.getBoundingClientRect().width || 400;
-      scale = Math.min(MAX, Math.max(MIN, parseFloat((stageW / svgW).toFixed(2))));
-      applyZoom();
+      tx = 0; ty = 0;
+      scale = Math.min(MAX, Math.max(MIN, parseFloat(((stage.clientWidth - 48) / svgW()).toFixed(2))));
+      applyTransform();
     }
 
     function fitView() {
-      var stageW = stage.clientWidth - 48;
-      var stageH = ($content.clientHeight || window.innerHeight) * 0.7;
-      var svgW   = svg.viewBox.baseVal.width  || 400;
-      var svgH   = svg.viewBox.baseVal.height || 200;
-      scale = Math.min(MAX, Math.max(MIN, parseFloat(Math.min(stageW/svgW, stageH/svgH).toFixed(2))));
-      applyZoom();
+      tx = 0; ty = 0;
+      var sw = stage.clientWidth - 48;
+      var sh = ($content.clientHeight || window.innerHeight) * 0.7;
+      scale = Math.min(MAX, Math.max(MIN, parseFloat(Math.min(sw / svgW(), sh / svgH()).toFixed(2))));
+      applyTransform();
     }
+
+    function fitCanvas() {
+      stage.style.height = (svgH() * scale + 48) + 'px';
+      inner.style.marginBottom = '0';
+    }
+
+    // 드래그 이동
+    var dragging = false, dragX = 0, dragY = 0, startTx = 0, startTy = 0;
+    inner.style.cursor = 'grab';
+
+    inner.addEventListener('mousedown', function(e) {
+      if (e.button !== 0) return;
+      dragging = true;
+      dragX = e.clientX; dragY = e.clientY;
+      startTx = tx; startTy = ty;
+      inner.style.cursor = 'grabbing';
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      tx = startTx + (e.clientX - dragX);
+      ty = startTy + (e.clientY - dragY);
+      inner.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+    });
+    document.addEventListener('mouseup', function() {
+      if (!dragging) return;
+      dragging = false;
+      inner.style.cursor = 'grab';
+    });
 
     // 버튼 이벤트
     wrap.querySelectorAll('.mctrl-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var a = btn.dataset.action;
-        if      (a === 'zoom-in')   { scale = Math.min(MAX, parseFloat((scale+STEP).toFixed(1))); applyZoom(); }
-        else if (a === 'zoom-out')  { scale = Math.max(MIN, parseFloat((scale-STEP).toFixed(1))); applyZoom(); }
-        else if (a === 'fit-width') { fitWidth(); }
-        else if (a === 'fit-view')  { fitView(); }
-        else if (a === 'save-svg')  { saveMermaidSVG(svg); }
-        else if (a === 'save-png')  { saveMermaidPNG(svg); }
+        if      (a === 'zoom-in')    { scale = Math.min(MAX, parseFloat((scale+STEP).toFixed(1))); applyTransform(); }
+        else if (a === 'zoom-out')   { scale = Math.max(MIN, parseFloat((scale-STEP).toFixed(1))); applyTransform(); }
+        else if (a === 'fit-width')  { fitWidth(); }
+        else if (a === 'fit-view')   { fitView(); }
+        else if (a === 'fit-canvas') { fitCanvas(); }
+        else if (a === 'save-svg')   { saveMermaidSVG(svg); }
+        else if (a === 'save-png')   { saveMermaidPNG(svg); }
       });
     });
 
@@ -796,7 +828,7 @@
       scale = e.deltaY < 0
         ? Math.min(MAX, parseFloat((scale+0.1).toFixed(1)))
         : Math.max(MIN, parseFloat((scale-0.1).toFixed(1)));
-      applyZoom();
+      applyTransform();
     }, { passive: false });
 
     // 더블클릭 → 팝업
@@ -829,13 +861,12 @@
   }
 
   function saveMermaidPNG(svg) {
-    var vb  = svg.viewBox.baseVal;
-    var w   = (vb && vb.width)  ? vb.width  * 2 : 1200;
-    var h   = (vb && vb.height) ? vb.height * 2 : 800;
-    var svgStr = new XMLSerializer().serializeToString(svg);
-    var blob   = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-    var url    = URL.createObjectURL(blob);
-    var img    = new Image();
+    var vb = svg.viewBox.baseVal;
+    var w  = (vb && vb.width)  ? vb.width  * 2 : 1200;
+    var h  = (vb && vb.height) ? vb.height * 2 : 800;
+    var svgStr  = new XMLSerializer().serializeToString(svg);
+    var dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+    var img = new Image();
     img.onload = function() {
       var canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
@@ -843,14 +874,13 @@
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, w, h);
       ctx.drawImage(img, 0, 0, w, h);
-      URL.revokeObjectURL(url);
       var a = document.createElement('a');
       a.href = canvas.toDataURL('image/png');
       a.download = 'diagram.png';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     };
-    img.onerror = function() { URL.revokeObjectURL(url); alert('PNG 변환 실패'); };
-    img.src = url;
+    img.onerror = function() { alert('PNG 변환 실패'); };
+    img.src = dataUrl;
   }
 
   // ── 이벤트 ──────────────────────────────────────────
