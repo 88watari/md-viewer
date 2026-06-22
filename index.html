@@ -354,6 +354,8 @@
     }
     .mermaid-stage svg { display: block; cursor: pointer; overflow: visible; }
     .mermaid-stage svg foreignObject { overflow: visible; }
+    .mermaid-stage svg foreignObject div { line-height: 1.25 !important; }
+    .mermaid-stage svg foreignObject p { margin: 0 !important; }
     .mermaid-error {
       color: #c7254e;
       font-size: 13px;
@@ -740,18 +742,21 @@
           if (!svg) return;
           svg.setAttribute('overflow', 'visible');
           svg.style.overflow = 'visible';
-          // foreignObject 실제 높이 재계산 (두 번째 줄 텍스트 잘림 방지)
+          // foreignObject 높이 재계산 + y를 중앙 기준으로 유지 (텍스트 잘림 + 내려앉음 방지)
           setTimeout(function() {
             svg.querySelectorAll('foreignObject').forEach(function(fo) {
               var div = fo.querySelector('div');
               if (!div) return;
-              var needed = div.scrollHeight + 4;
-              var curr = parseFloat(fo.getAttribute('height') || 0);
-              if (needed > curr) {
+              var needed = div.scrollHeight + 2;
+              var currH = parseFloat(fo.getAttribute('height') || 0);
+              if (needed > currH) {
+                var currY  = parseFloat(fo.getAttribute('y') || 0);
+                var centerY = currY + currH / 2;
+                var newY   = centerY - needed / 2;
                 fo.setAttribute('height', needed);
-                var bottom = parseFloat(fo.getAttribute('y') || 0) + needed;
+                fo.setAttribute('y', newY);
                 var vb = svg.viewBox.baseVal;
-                if (bottom > vb.height) vb.height = bottom + 20;
+                if (newY + needed > vb.height) vb.height = newY + needed + 16;
               }
             });
             setupMermaidControls(wrap, inner, svg);
